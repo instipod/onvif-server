@@ -41,6 +41,13 @@ class OnvifServer {
             Framerate: this.config.highQuality.framerate,
             Resolution: { Width: this.config.highQuality.width, Height: this.config.highQuality.height }
         };
+
+        this.audioSource = {
+            attributes: {
+                token: 'audio_src_token'
+            },
+            Channels: 1
+        };
     
         this.profiles = [
             {
@@ -56,6 +63,14 @@ class OnvifServer {
                     },
                     SourceToken: 'video_src_token',
                     Bounds: { attributes: { x: 0, y: 0, width: this.config.highQuality.width, height: this.config.highQuality.height } }
+                },
+                AudioSourceConfiguration: {
+                    Name: 'AudioSource',
+                    UseCount: 2,
+                    attributes: {
+                        token: 'audio_src_config_token'
+                    },
+                    SourceToken: 'audio_src_token'
                 },
                 VideoEncoderConfiguration: {
                     attributes: {
@@ -79,6 +94,17 @@ class OnvifServer {
                         H264Profile: 'Main'
                     },
                     SessionTimeout: 'PT1000S'
+                },
+                AudioEncoderConfiguration: {
+                    attributes: {
+                        token: 'audio_encoder_config_token'
+                    },
+                    Name: 'AudioEncoderConfiguration',
+                    UseCount: 1,
+                    Encoding: 'G711',
+                    Bitrate: 64,
+                    SampleRate: 8,
+                    SessionTimeout: 'PT1000S'
                 }
             }
         ];
@@ -98,6 +124,14 @@ class OnvifServer {
                         },
                         SourceToken: 'video_src_token',
                         Bounds: { attributes: { x: 0, y: 0, width: this.config.highQuality.width, height: this.config.highQuality.height } }
+                    },
+                    AudioSourceConfiguration: {
+                        Name: 'AudioSource',
+                        UseCount: 2,
+                        attributes: {
+                            token: 'audio_src_config_token'
+                        },
+                        SourceToken: 'audio_src_token'
                     },
                     VideoEncoderConfiguration: {
                         attributes: {
@@ -120,6 +154,17 @@ class OnvifServer {
                             GovLength: this.config.lowQuality.framerate,
                             H264Profile: 'Main'
                         },
+                        SessionTimeout: 'PT1000S'
+                    },
+                    AudioEncoderConfiguration: {
+                        attributes: {
+                            token: 'audio_encoder_config_token'
+                        },
+                        Name: 'AudioEncoderConfiguration',
+                        UseCount: 1,
+                        Encoding: 'G711',
+                        Bitrate: 64,
+                        SampleRate: 8,
                         SessionTimeout: 'PT1000S'
                     }
                 }
@@ -295,7 +340,15 @@ class OnvifServer {
                             ]
                         };
                     },
-        
+
+                    GetAudioSources: (args) => {
+                        return {
+                            AudioSources: [
+                                this.audioSource
+                            ]
+                        };
+                    },
+
                     GetSnapshotUri: (args) => {
                         let uri = `http://${this.config.hostname}:${this.config.ports.server}/snapshot.png`;
                         if (args.ProfileToken == 'sub_stream' && this.config.lowQuality && this.config.lowQuality.snapshot)
@@ -414,6 +467,7 @@ class OnvifServer {
                                         <d:Types>dn:NetworkVideoTransmitter</d:Types>
                                         <d:Scopes>
                                             onvif://www.onvif.org/type/video_encoder
+                                            onvif://www.onvif.org/type/audio_encoder
                                             onvif://www.onvif.org/type/ptz
                                             onvif://www.onvif.org/hardware/Onvif
                                             onvif://www.onvif.org/name/Cardinal
